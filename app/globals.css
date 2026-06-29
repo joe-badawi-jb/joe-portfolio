@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ *
+ * Design tokens.
+ * Raw palette values live under :root as CSS variables, then are
+ * mapped into Tailwind's theme via var() so each `--color-*` token
+ * auto-generates utilities: bg-*, text-*, border-*, ring-*, etc.
+ * White is built-in (bg-white / text-white).
+ *
+ * Usage rules:
+ *  - bg-surface is the primary surface for ALL sections (never #000).
+ *  - Blue = links / primary actions; Pink = hover, highlights, CTAs.
+ *  - Don't combine blue and pink on the same element.
+ * ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces (backgrounds) */
+  --surface: #0a0a0f;        /* primary background (near-black) */
+  --surface-card: #15151e;   /* card / section background */
+  --surface-raised: #1e1e2a; /* raised / hover surface */
+
+  /* Accents (typography, links, hover) */
+  --accent-blue: #3b82f6;        /* primary links / interactive text */
+  --accent-blue-hover: #60a5fa;  /* blue hover / active state */
+  --accent-pink: #ec4899;        /* secondary accent / CTAs */
+  --accent-pink-hover: #f472b6;  /* pink hover / active state */
+
+  /* Text */
+  --content: #e5e7eb; /* primary body text */
+  --muted: #9ca3af;   /* muted / secondary text */
+
+  /* Borders */
+  --line: #4b5563;     /* borders and dividers */
+  --hairline: #27272f; /* subtle hairline borders */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Surfaces */
+  --color-surface: var(--surface);
+  --color-surface-card: var(--surface-card);
+  --color-surface-raised: var(--surface-raised);
+
+  /* Accents */
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-hover: var(--accent-blue-hover);
+  --color-accent-pink: var(--accent-pink);
+  --color-accent-pink-hover: var(--accent-pink-hover);
+
+  /* Text */
+  --color-content: var(--content);
+  --color-muted: var(--muted);
+
+  /* Borders */
+  --color-line: var(--line);
+  --color-hairline: var(--hairline);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-surface);
+  color: var(--color-content);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
