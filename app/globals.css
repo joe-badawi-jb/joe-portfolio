@@ -17,6 +17,7 @@
   --surface: #0a0a0f;        /* primary background (near-black) */
   --surface-card: #15151e;   /* card / section background */
   --surface-raised: #1e1e2a; /* raised / hover surface */
+  --surface-blue: #0c1a3d;   /* blue-tinted surface (overlapping section) */
 
   /* Accents (typography, links, hover) */
   --accent-blue: #3b82f6;        /* primary links / interactive text */
@@ -38,6 +39,7 @@
   --color-surface: var(--surface);
   --color-surface-card: var(--surface-card);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-blue: var(--surface-blue);
 
   /* Accents */
   --color-accent-blue: var(--accent-blue);
@@ -68,25 +70,64 @@ body {
   background-color: var(--color-surface);
   color: var(--color-content);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  /* Smoothly cross-fade when the theme flips during the scroll transition. */
+  /* Cross-fade when the theme flips at the end of the code-run section. */
   transition: background-color 500ms ease, color 500ms ease;
 }
 
 /* ------------------------------------------------------------------ *
- * Light theme — toggled on <html> at the halfway point of the
- * hero -> about scroll transition. Overriding the raw palette tokens
- * flips the entire UI (surfaces, text, borders, and the sticky header)
- * at once. Accent colours are intentionally kept (blue/pink read fine
- * on white). html.theme-light beats :root in specificity.
+ * Light theme — toggled on <html> when the runner crosses the finish
+ * line. Overriding the raw palette tokens flips the whole UI at once
+ * (surfaces, text, borders, header). Accents are kept. html.theme-light
+ * beats :root in specificity.
  * ------------------------------------------------------------------ */
 html.theme-light {
   --surface: #ffffff;
   --surface-card: #f4f4f5;
   --surface-raised: #e5e7eb;
+  --surface-blue: #e8eeff; /* light blue tint */
   --content: #0a0a0f;
   --muted: #52525b;
   --line: #d4d4d8;
   --hairline: #e4e4e7;
+}
+
+/* In light mode the overlapping section becomes solid white — no blur, no
+   translucency (these Tailwind utilities are overridden here per theme). */
+html.theme-light .code-run-panel {
+  background-color: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The section covers the viewport during the flip, so it (and its contents)
+   need their own transition to cross-fade — the body's transition is hidden
+   behind it. Only colour properties, so the run/typing transforms are safe. */
+.code-run-panel,
+.code-run-panel * {
+  transition: background-color 500ms ease, border-color 500ms ease,
+    color 500ms ease;
+}
+
+/* Subtle run bob for the runner SVG (inner element, so it doesn't clash
+   with the translateX applied to the outer wrapper on scroll). */
+@keyframes mario-run {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.mario-bob {
+  animation: mario-run 0.45s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mario-bob {
+    animation: none;
+  }
 }
 
 /* ------------------------------------------------------------------ *

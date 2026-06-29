@@ -24,7 +24,7 @@ export default function Header() {
     const [open, setOpen] = useState(false);
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-hairline bg-surface/80 backdrop-blur transition-colors">
+        <header className="sticky top-0 z-50 w-full border-b border-hairline bg-surface/80 backdrop-blur">
             <nav className="container flex items-center justify-between py-4">
                 {/* Logo */}
                 <Link href="/" className="shrink-0" aria-label="Home">
