@@ -54,12 +54,236 @@
   --color-hairline: var(--hairline);
 
   /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Default transition for all action utilities (opacity, translate,
+     open/close, colours, ...): 0.5s ease, applied site-wide so individual
+     `transition-*` utilities don't need explicit durations. */
+  --default-transition-duration: 500ms;
+  --default-transition-timing-function: ease;
 }
 
 body {
   background-color: var(--color-surface);
   color: var(--color-content);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Smoothly cross-fade when the theme flips during the scroll transition. */
+  transition: background-color 500ms ease, color 500ms ease;
+}
+
+/* ------------------------------------------------------------------ *
+ * Light theme — toggled on <html> at the halfway point of the
+ * hero -> about scroll transition. Overriding the raw palette tokens
+ * flips the entire UI (surfaces, text, borders, and the sticky header)
+ * at once. Accent colours are intentionally kept (blue/pink read fine
+ * on white). html.theme-light beats :root in specificity.
+ * ------------------------------------------------------------------ */
+html.theme-light {
+  --surface: #ffffff;
+  --surface-card: #f4f4f5;
+  --surface-raised: #e5e7eb;
+  --content: #0a0a0f;
+  --muted: #52525b;
+  --line: #d4d4d8;
+  --hairline: #e4e4e7;
+}
+
+/* ------------------------------------------------------------------ *
+ * Matrix "digital rain" loader (see components/loader/MatrixLoader.tsx).
+ * On exit the overlay wipes out from the bottom upward: an animated mask
+ * makes the bottom turn transparent first. Browsers without @property
+ * support fall back to the plain opacity fade in the same keyframes.
+ * ------------------------------------------------------------------ */
+@property --matrix-wipe {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 120%;
+}
+
+.matrix-loader {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(var(--matrix-wipe) - 12%),
+    transparent var(--matrix-wipe)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(var(--matrix-wipe) - 12%),
+    transparent var(--matrix-wipe)
+  );
+}
+
+.matrix-exit {
+  animation: matrix-wipe-up 0.6s ease forwards;
+}
+
+@keyframes matrix-wipe-up {
+  from {
+    --matrix-wipe: 120%;
+    opacity: 1;
+  }
+  to {
+    --matrix-wipe: -20%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matrix-exit {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Centered content wrapper used across sections. */
+.container {
+  width: 95%;
+  max-width: 95%; /* matches Tailwind's max-w-7xl */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * Animated strikethrough nav links.
+ * A center line sweeps left -> right on hover (width 0 -> 100%) and the
+ * label shifts to the per-item accent colour. The accent is supplied
+ * per element with the Tailwind utility [--accent:var(--accent-*)],
+ * so blue/pink can alternate without any inline styles.
+ * ------------------------------------------------------------------ */
+.nav-link {
+  position: relative;
+  display: inline-block;
+  transition: color 0.5s ease;
+}
+
+/* Per-item accent modifiers (alternated blue/pink in the header). */
+.nav-accent-blue {
+  --accent: var(--accent-blue);
+}
+
+.nav-accent-pink {
+  --accent: var(--accent-pink);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  width: 0;
+  background-color: var(--accent, currentColor);
+  transition: width 0.5s ease;
+}
+
+.nav-link:hover {
+  color: var(--accent, currentColor);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-link::after {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Glitch / RGB-split hover effect for the Contact CTA.
+ * Lives in the global stylesheet because it relies on pseudo-elements
+ * (content: attr(data-text)) that Tailwind utilities can't express.
+ * Markup: <a class="glitch-link"><span class="glitch" data-text="...">…</span></a>
+ * ------------------------------------------------------------------ */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-link:hover .glitch::before {
+  opacity: 0.85;
+  color: var(--accent-blue);
+  animation: glitch-anim-1 0.45s steps(2, end) infinite;
+}
+
+.glitch-link:hover .glitch::after {
+  opacity: 0.85;
+  color: var(--accent-pink-hover);
+  animation: glitch-anim-2 0.45s steps(2, end) infinite;
+}
+
+@keyframes glitch-anim-1 {
+  0%   { clip-path: inset(18% 0 62% 0); transform: translate(-2px, -1px); }
+  20%  { clip-path: inset(8% 0 78% 0);  transform: translate(2px, 1px); }
+  40%  { clip-path: inset(48% 0 30% 0); transform: translate(-1px, 1px); }
+  60%  { clip-path: inset(28% 0 46% 0); transform: translate(2px, -1px); }
+  80%  { clip-path: inset(68% 0 10% 0); transform: translate(-2px, 1px); }
+  100% { clip-path: inset(38% 0 40% 0); transform: translate(1px, -1px); }
+}
+
+@keyframes glitch-anim-2 {
+  0%   { clip-path: inset(62% 0 18% 0); transform: translate(2px, 1px); }
+  20%  { clip-path: inset(78% 0 8% 0);  transform: translate(-2px, -1px); }
+  40%  { clip-path: inset(30% 0 48% 0); transform: translate(1px, -1px); }
+  60%  { clip-path: inset(46% 0 28% 0); transform: translate(-2px, 1px); }
+  80%  { clip-path: inset(10% 0 68% 0); transform: translate(2px, -1px); }
+  100% { clip-path: inset(40% 0 38% 0); transform: translate(-1px, 1px); }
+}
+
+/* Touch devices have no hover, so play the glitch on an infinite loop:
+   a quick blue/pink burst, then hidden, repeating roughly every second. */
+@media (hover: none) {
+  .glitch-link .glitch::before {
+    color: var(--accent-blue);
+    animation: glitch-loop-1 1.5s infinite;
+  }
+
+  .glitch-link .glitch::after {
+    color: var(--accent-pink-hover);
+    animation: glitch-loop-2 1.5s infinite;
+  }
+}
+
+@keyframes glitch-loop-1 {
+  0%   { opacity: 0.85; clip-path: inset(18% 0 62% 0); transform: translate(-2px, -1px); }
+  6%   { opacity: 0.85; clip-path: inset(8% 0 78% 0);  transform: translate(2px, 1px); }
+  12%  { opacity: 0.85; clip-path: inset(48% 0 30% 0); transform: translate(-1px, 1px); }
+  18%  { opacity: 0.85; clip-path: inset(28% 0 46% 0); transform: translate(2px, -1px); }
+  24%  { opacity: 0.85; clip-path: inset(68% 0 10% 0); transform: translate(-2px, 1px); }
+  30%  { opacity: 0;    clip-path: inset(38% 0 40% 0); transform: translate(0, 0); }
+  100% { opacity: 0; }
+}
+
+@keyframes glitch-loop-2 {
+  0%   { opacity: 0.85; clip-path: inset(62% 0 18% 0); transform: translate(2px, 1px); }
+  6%   { opacity: 0.85; clip-path: inset(78% 0 8% 0);  transform: translate(-2px, -1px); }
+  12%  { opacity: 0.85; clip-path: inset(30% 0 48% 0); transform: translate(1px, -1px); }
+  18%  { opacity: 0.85; clip-path: inset(46% 0 28% 0); transform: translate(-2px, 1px); }
+  24%  { opacity: 0.85; clip-path: inset(10% 0 68% 0); transform: translate(2px, -1px); }
+  30%  { opacity: 0;    clip-path: inset(40% 0 38% 0); transform: translate(0, 0); }
+  100% { opacity: 0; }
+}
+
+/* Respect users who prefer reduced motion (covers hover and looped). */
+@media (prefers-reduced-motion: reduce) {
+  .glitch-link:hover .glitch::before,
+  .glitch-link:hover .glitch::after,
+  .glitch-link .glitch::before,
+  .glitch-link .glitch::after {
+    animation: none;
+    opacity: 0;
+  }
 }

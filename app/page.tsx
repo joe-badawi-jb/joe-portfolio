@@ -1,12 +1,13 @@
-import Link from "next/link";
-import PCModel from "./components/3dModels/PCModel";
+import Hero from "./components/sections/Hero";
+import HeroAboutTransition from "./components/sections/HeroAboutTransition";
+import About from "./components/sections/About";
 
 export default function Home() {
   return (
-   <div>
-    <section className="h-[80vh] w-full">
-      <PCModel />
-    </section>
-   </div>
+    <>
+      <Hero />
+      <HeroAboutTransition />
+      <About />
+    </>
   );
 }

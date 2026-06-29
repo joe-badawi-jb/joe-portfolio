@@ -1,6 +1,6 @@
 'use client'
 
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import {
     OrbitControls,
     Stage,
@@ -10,9 +10,9 @@ import {
     useProgress,
     useGLTF,
 } from '@react-three/drei'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 
-const MODEL_PATH = '/assets/3d-models/gaming_desktop_pc.glb'
+const MODEL_PATH = '/assets/3d-models/modern_desk_setup__game_ready_3d_model.glb'
 
 // Rotation (radians) applied so the model's front faces the camera by default.
 // The model is authored facing along a different axis; a quarter turn about Y
@@ -23,7 +23,7 @@ const FACING_ROTATION_Y = -Math.PI / 2
 function Model() {
     // useGLTF parses the .glb (geometry + embedded textures) and caches it.
     const { scene } = useGLTF(MODEL_PATH)
-    return <primitive object={scene} rotation={[0, FACING_ROTATION_Y, 0]} />
+    return <primitive object={scene} rotation={[0, 0, 0]} />
 }
 
 // Preload so the asset starts downloading before the component mounts.
@@ -40,10 +40,45 @@ function Loader() {
     )
 }
 
+type RotatableControls = {
+    autoRotate: boolean
+    addEventListener: (type: string, listener: () => void) => void
+    removeEventListener: (type: string, listener: () => void) => void
+}
+
+// Pause the auto-rotation only while the user is actively orbiting. We use
+// OrbitControls' own 'start'/'end' events: with zoom + pan disabled they fire
+// ONLY on a rotate drag (the wheel handler bails early when enableZoom is
+// false), and they always pair up — even when a touch gesture is cancelled —
+// so the spin reliably resumes on release.
+function PauseAutoRotateOnDrag() {
+    const controls = useThree(
+        (s) => s.controls
+    ) as unknown as RotatableControls | null
+
+    useEffect(() => {
+        if (!controls) return
+        const pause = () => {
+            controls.autoRotate = false
+        }
+        const resume = () => {
+            controls.autoRotate = true
+        }
+        controls.addEventListener('start', pause)
+        controls.addEventListener('end', resume)
+        return () => {
+            controls.removeEventListener('start', pause)
+            controls.removeEventListener('end', resume)
+        }
+    }, [controls])
+
+    return null
+}
+
 export default function PCModel() {
     return (
         <Canvas
-            shadows
+            shadows="percentage"
             dpr={[1, 2]}
             camera={{ position: [0, 0, 6], fov: 45 }}
             className="h-full w-full"
@@ -85,13 +120,9 @@ export default function PCModel() {
                     <Model />
                 </Stage>
             </Suspense>
-            <OrbitControls
-                makeDefault
-                enablePan={false}
-                minPolarAngle={0}
-                maxPolarAngle={Math.PI / 2}
-                autoRotate
-            />
+            {/* Full freedom: rotate, zoom and pan, no angle limits. */}
+            <OrbitControls makeDefault autoRotate autoRotateSpeed={7} />
+            <PauseAutoRotateOnDrag />
         </Canvas>
     )
 }
