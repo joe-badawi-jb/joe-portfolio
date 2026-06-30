@@ -1,15 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ContactButton from "../buttons/ContactButton";
 
 const NAV_LINKS = [
     { label: "About", href: "#about" },
-    { label: "Projects", href: "#projects" },
-    { label: "Experience", href: "#experience" },
     { label: "Skills", href: "#skills" },
+    { label: "Projects", href: "#projects" },
+    { label: "Stack", href: "#stack" },
 ];
 
 // Animated left->right strikethrough + colour shift on hover (see
@@ -22,12 +21,60 @@ const accentByIndex = (i: number) =>
 
 export default function Header() {
     const [open, setOpen] = useState(false);
+    const [activeHref, setActiveHref] = useState<string | null>(null);
+
+    // Scroll-spy: mark the section currently around the middle of the viewport
+    // as active.
+    useEffect(() => {
+        const sections = NAV_LINKS.map((l) =>
+            document.getElementById(l.href.slice(1))
+        ).filter((el): el is HTMLElement => el !== null);
+        if (sections.length === 0) return;
+
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) setActiveHref("#" + entry.target.id);
+                });
+            },
+            { rootMargin: "-45% 0px -50% 0px" }
+        );
+        sections.forEach((el) => io.observe(el));
+        return () => io.disconnect();
+    }, []);
+
+    const handleNavClick = (
+        e: React.MouseEvent<HTMLAnchorElement>,
+        href: string
+    ) => {
+        e.preventDefault();
+        setActiveHref(href);
+        setOpen(false);
+        document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        setActiveHref(null);
+        setOpen(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const linkClass = (href: string, i: number, extra = "") =>
+        `${navLinkClasses} ${extra} ${accentByIndex(i)} ${
+            activeHref === href ? "is-active" : ""
+        }`;
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-hairline bg-surface/80 backdrop-blur">
+        <header className="sticky top-0 z-50 w-full border-b border-hairline bg-surface/80 backdrop-blur transition-colors">
             <nav className="container flex items-center justify-between py-4">
-                {/* Logo */}
-                <Link href="/" className="shrink-0" aria-label="Home">
+                {/* Logo — back to the hero / top */}
+                <a
+                    href="#"
+                    onClick={handleLogoClick}
+                    className="shrink-0"
+                    aria-label="Back to top"
+                >
                     <Image
                         src="/assets/icons/joe-logo.png"
                         alt="Joe logo"
@@ -36,18 +83,19 @@ export default function Header() {
                         priority
                         className="object-cover rounded-[50%]"
                     />
-                </Link>
+                </a>
 
                 {/* Desktop nav (centered) */}
                 <ul className="hidden items-center gap-6 md:flex">
                     {NAV_LINKS.map((link, i) => (
                         <li key={link.href}>
-                            <Link
+                            <a
                                 href={link.href}
-                                className={`${navLinkClasses} ${accentByIndex(i)}`}
+                                onClick={(e) => handleNavClick(e, link.href)}
+                                className={linkClass(link.href, i)}
                             >
                                 {link.label}
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>
@@ -95,13 +143,13 @@ export default function Header() {
                 <ul className="flex flex-col gap-6">
                     {NAV_LINKS.map((link, i) => (
                         <li key={link.href}>
-                            <Link
+                            <a
                                 href={link.href}
-                                className={`${navLinkClasses} text-2xl ${accentByIndex(i)}`}
-                                onClick={() => setOpen(false)}
+                                onClick={(e) => handleNavClick(e, link.href)}
+                                className={linkClass(link.href, i, "text-2xl")}
                             >
                                 {link.label}
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>

@@ -128,7 +128,7 @@ export default function CodeRunSection() {
             ref={wrapRef}
             className="code-run-panel relative z-10 h-[320vh] rounded-t-[20px] bg-surface-blue/80 backdrop-blur-2xl"
         >
-            <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden pt-24 pb-12">
+            <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden pt-12 pb-6">
                 <div className="container flex flex-col gap-8">
                     {/* IDE */}
                     <div className="overflow-hidden rounded-xl border border-hairline bg-surface-card shadow-2xl">
@@ -140,7 +140,7 @@ export default function CodeRunSection() {
                                 runner.js
                             </span>
                         </div>
-                        <pre className="min-h-[13rem] overflow-x-auto p-5 font-mono text-sm leading-relaxed md:text-base">
+                        <pre className="min-h-52 overflow-x-auto p-5 font-mono text-sm leading-relaxed md:text-base">
                             <code>
                                 {TOKENS.map((tok, i) => {
                                     if (tok.start >= revealed) return null

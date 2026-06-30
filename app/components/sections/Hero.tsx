@@ -6,6 +6,7 @@ import { animate } from "animejs";
 import { createHeroIntro } from "@/app/animations/heroIntro";
 import { LOADER_DURATION_MS } from "@/app/components/loader/MatrixLoader";
 import ContactButton from "@/app/components/buttons/ContactButton";
+import CodeBackdrop from "@/app/components/background/CodeBackdrop";
 
 // Heavy 3D scene: loaded lazily and mounted after the intro loader so its
 // GLB parse / WebGL init don't compete with the loader or the text intro.
@@ -61,7 +62,9 @@ export default function Hero() {
       ref={root}
       className="sticky top-0 z-0 flex h-screen items-center overflow-hidden"
     >
-      <div className="container grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-10">
+      <CodeBackdrop className="z-0" />
+
+      <div className="container relative z-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-10">
         {/* Left: text */}
         <div className="flex flex-col items-start gap-6">
           <p className="hero-eyebrow font-mono text-sm uppercase tracking-[0.3em] text-accent-blue opacity-0 md:text-base">

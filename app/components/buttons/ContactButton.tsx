@@ -2,6 +2,7 @@ type ContactButtonProps = {
     href?: string;
     label?: string;
     className?: string;
+    newTab?: boolean;
 };
 
 /**
@@ -14,10 +15,13 @@ export default function ContactButton({
     href = "#contact",
     label = "Contact me",
     className = "",
+    newTab = false,
 }: ContactButtonProps) {
     return (
         <a
             href={href}
+            target={newTab ? "_blank" : undefined}
+            rel={newTab ? "noopener noreferrer" : undefined}
             className={`glitch-link relative inline-flex items-center justify-center overflow-hidden border border-accent-pink/50 bg-surface-card px-6 py-3 font-mono text-base font-medium uppercase tracking-widest text-accent-pink transition-colors hover:border-accent-pink hover:bg-surface-raised ${className}`}
         >
             <span data-text={label} className="glitch">

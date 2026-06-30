@@ -11,7 +11,7 @@ const ParticlesBackground = dynamic(
 );
 
 // Placeholder copy — real content comes later.
-const TITLE_WORDS = ["A", "bit", "about", "me."];
+const TITLE_WORDS = ["Engineering", "with", "intent."];
 
 export default function About() {
     const root = useRef<HTMLElement>(null);
@@ -52,7 +52,7 @@ export default function About() {
         <section
             id="about"
             ref={root}
-            className="relative z-10 flex min-h-screen items-center overflow-hidden bg-surface"
+            className="relative z-10 flex py-10 items-center overflow-hidden bg-surface"
         >
             {showParticles && (
                 <ParticlesBackground className="absolute inset-0 z-0" />
@@ -74,9 +74,10 @@ export default function About() {
                 <span className="about-accent mt-8 block h-1 w-0 rounded-full bg-accent-pink" />
 
                 <p className="about-desc mt-8 max-w-2xl text-xl leading-relaxed text-muted opacity-0 md:text-2xl">
-                    Placeholder description for the about section. This is where a
-                    short, punchy bio will live — who you are, what you build, and
-                    what you care about. Your real content goes here later.
+                    Computer Engineering graduate and frontend-focused software
+                    engineer crafting fast, responsive web and mobile experiences
+                    with React and Next.js. I pair clean, user-centered engineering
+                    with AI-augmented development to ship polished products — faster.
                 </p>
             </div>
         </section>
