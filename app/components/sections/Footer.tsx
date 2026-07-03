@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+
 // Social links shown on the right of the footer. Icons live under
 // /public/assets/icons and are dark-filled, so they sit inside a light chip
 // (see below) to stay legible in either theme.
