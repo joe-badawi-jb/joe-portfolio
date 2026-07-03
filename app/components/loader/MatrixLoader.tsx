@@ -45,10 +45,14 @@ export default function MatrixLoader() {
     const [minPassed, setMinPassed] = useState(false);
     // Ready immediately if this page has no critical model to wait for.
     const [assetReady, setAssetReady] = useState(model === null);
-    // On the hobbies page, also wait for the intro video to be buffered so it
-    // plays immediately when the loader lifts (no second "loading" screen).
+    // On the hobbies page the loader keeps covering until the intro video is
+    // actually PLAYING (not just buffered), so it never fades to a black/frozen
+    // video. `videoReady` = buffered (canplaythrough); `videoPlaying` = the
+    // video has started rendering frames.
     const needsVideo = (pathname ?? "").startsWith("/hobbies");
     const [videoReady, setVideoReady] = useState(!needsVideo);
+    const [videoPlaying, setVideoPlaying] = useState(false);
+    const playRequested = useRef(false);
     const exitStarted = useRef(false);
 
     const startExit = useCallback(() => {
@@ -69,18 +73,38 @@ export default function MatrixLoader() {
         return () => window.clearInterval(id);
     }, []);
 
-    // Lift once the minimum time has passed, the first model is loaded, and
-    // (on hobbies) the intro video is buffered.
-    useEffect(() => {
-        if (minPassed && assetReady && videoReady) startExit();
-    }, [minPassed, assetReady, videoReady, startExit]);
-
-    // Wait for the hobbies intro video to be ready to play.
+    // Phase 1 (hobbies): once the min time, model and buffered video are ready,
+    // tell the video to start playing — while the loader is still fully opaque.
     useEffect(() => {
         if (!needsVideo) return;
-        const onVideoReady = () => setVideoReady(true);
-        window.addEventListener("video:ready", onVideoReady);
-        return () => window.removeEventListener("video:ready", onVideoReady);
+        if (minPassed && assetReady && videoReady && !playRequested.current) {
+            playRequested.current = true;
+            window.dispatchEvent(new Event("intro:play"));
+        }
+    }, [needsVideo, minPassed, assetReady, videoReady]);
+
+    // Phase 2 / non-video: lift the loader. Without a video, as soon as the min
+    // time + model are ready. With a video, ONLY once it's actually playing —
+    // so the loader never fades one moment before the video is on screen.
+    useEffect(() => {
+        if (needsVideo) {
+            if (videoPlaying) startExit();
+        } else if (minPassed && assetReady) {
+            startExit();
+        }
+    }, [needsVideo, minPassed, assetReady, videoPlaying, startExit]);
+
+    // Listen for the hobbies intro video's buffered / playing signals.
+    useEffect(() => {
+        if (!needsVideo) return;
+        const onReady = () => setVideoReady(true);
+        const onPlaying = () => setVideoPlaying(true);
+        window.addEventListener("video:ready", onReady);
+        window.addEventListener("video:playing", onPlaying);
+        return () => {
+            window.removeEventListener("video:ready", onReady);
+            window.removeEventListener("video:playing", onPlaying);
+        };
     }, [needsVideo]);
 
     useEffect(() => {

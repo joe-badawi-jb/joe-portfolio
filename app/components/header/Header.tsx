@@ -158,7 +158,10 @@ export default function Header() {
 
                 {/* Desktop CTA */}
                 <div className="hidden md:block">
-                    <ContactButton />
+                    <ContactButton
+                        href={isHome ? "#contact" : "/#contact"}
+                        onClick={(e) => handleNavClick(e, "#contact")}
+                    />
                 </div>
 
                 {/* Mobile toggle */}
@@ -221,7 +224,11 @@ export default function Header() {
                     </li>
                 </ul>
                 <div className="mt-6">
-                    <ContactButton className="w-full" />
+                    <ContactButton
+                        className="w-full"
+                        href={isHome ? "#contact" : "/#contact"}
+                        onClick={(e) => handleNavClick(e, "#contact")}
+                    />
                 </div>
             </div>
         </header>

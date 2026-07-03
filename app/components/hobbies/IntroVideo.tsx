@@ -58,18 +58,21 @@ export default function IntroVideo({ src }: { src: string }) {
             }
         };
 
-        // Start only once the matrix loader has lifted (it already waited for
-        // this video to buffer), so it plays instantly with no gap.
+        // The matrix loader tells us to start ("intro:play") while it's still
+        // fully covering the screen; it only fades once we report we're playing
+        // (onPlaying -> "video:playing"). "loader:done" is a safety fallback.
         let started = false;
         const startPlay = () => {
             if (started) return;
             started = true;
             play();
         };
+        window.addEventListener("intro:play", startPlay);
         window.addEventListener("loader:done", startPlay);
         const fallback = window.setTimeout(startPlay, 6000);
 
         return () => {
+            window.removeEventListener("intro:play", startPlay);
             window.removeEventListener("loader:done", startPlay);
             window.clearTimeout(fallback);
             document.body.classList.remove("overflow-hidden");
@@ -101,7 +104,14 @@ export default function IntroVideo({ src }: { src: string }) {
                 onCanPlayThrough={() =>
                     window.dispatchEvent(new Event("video:ready"))
                 }
-                onError={() => window.dispatchEvent(new Event("video:ready"))}
+                onPlaying={() =>
+                    window.dispatchEvent(new Event("video:playing"))
+                }
+                onError={() => {
+                    // Don't leave the loader hanging if the video fails.
+                    window.dispatchEvent(new Event("video:ready"));
+                    window.dispatchEvent(new Event("video:playing"));
+                }}
                 onEnded={finish}
                 className="h-full w-full object-cover"
             />
