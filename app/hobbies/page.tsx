@@ -6,6 +6,7 @@ import GokuHintPopup from "@/app/components/hobbies/GokuHintPopup";
 import NarutoTransition from "@/app/components/hobbies/NarutoTransition";
 import SportsRoll from "@/app/components/hobbies/SportsRoll";
 import GamingModel from "@/app/components/hobbies/GamingModel";
+import ModelPreloader from "@/app/components/hobbies/ModelPreloader";
 import InView from "@/app/components/ui/InView";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function HobbiesPage() {
         <>
             <IntroVideo src="/assets/videos/nimbus.mp4" />
             <GokuHintPopup />
+            <ModelPreloader />
 
             {/* Anime hero — sticky & pinned (z-0) so the next section scrolls up
                 and overlaps it, exactly like the landing page's hero. Height is

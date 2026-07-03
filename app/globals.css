@@ -209,6 +209,27 @@ html.theme-light .code-run-panel {
   }
 }
 
+/* Fade-in for lazily-mounted 3D canvases so models appear smoothly instead of
+   popping in once their data is ready. */
+@keyframes model-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.model-fade-in {
+  animation: model-fade-in 0.7s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-fade-in {
+    animation: none;
+  }
+}
+
 /* Centered content wrapper used across sections. */
 .container {
   width: 95%;

@@ -152,7 +152,7 @@ export default function GokuNimbus() {
             dpr={[1, 2]}
             camera={{ position: [0, 0, 9], fov: 45 }}
             gl={{ alpha: true }}
-            className="h-full w-full"
+            className="model-fade-in h-full w-full"
         >
             <Suspense fallback={null}>
                 <Environment resolution={256}>

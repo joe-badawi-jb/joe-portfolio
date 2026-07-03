@@ -17,6 +17,7 @@ export default function IntroVideo({ src }: { src: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [phase, setPhase] = useState<Phase>("playing");
     const [muted, setMuted] = useState(false);
+    const [ready, setReady] = useState(false);
 
     const finish = () => {
         setPhase("fading");
@@ -81,9 +82,16 @@ export default function IntroVideo({ src }: { src: string }) {
                 ref={videoRef}
                 src={src}
                 playsInline
+                preload="auto"
+                onPlaying={() => setReady(true)}
                 onEnded={finish}
                 className="h-full w-full object-cover"
             />
+
+            {/* Buffering spinner while the video loads/starts. */}
+            {!ready && phase === "playing" && (
+                <span className="absolute h-10 w-10 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+            )}
 
             {/* Offer sound if autoplay forced us to start muted. */}
             {muted && phase === "playing" && (

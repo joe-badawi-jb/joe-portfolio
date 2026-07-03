@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ContactButton from "../buttons/ContactButton";
 
 // In-page section links (scroll to an anchor on the home page).
@@ -83,6 +83,23 @@ export default function Header() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    // Warm the hobbies intro assets on hover/focus so they're cached before the
+    // click — the ~1MB intro video especially, plus the first image and model.
+    const prefetched = useRef(false);
+    const prefetchHobbies = () => {
+        if (prefetched.current) return;
+        prefetched.current = true;
+        [
+            "/assets/videos/nimbus.mp4",
+            "/assets/images/anime-crossover.webp",
+            "/assets/3d-models/goku_nimbus.glb",
+        ].forEach((u) => {
+            fetch(u, { cache: "force-cache" })
+                .then((r) => r.arrayBuffer())
+                .catch(() => {});
+        });
+    };
+
     const linkClass = (href: string, i: number, extra = "") =>
         `${navLinkClasses} ${extra} ${accentByIndex(i)} ${
             isHome && activeHref === href ? "is-active" : ""
@@ -130,6 +147,8 @@ export default function Header() {
                         <Link
                             href={HOBBIES.href}
                             onClick={() => setOpen(false)}
+                            onMouseEnter={prefetchHobbies}
+                            onFocus={prefetchHobbies}
                             className={hobbiesClass()}
                         >
                             {HOBBIES.label}
@@ -193,6 +212,8 @@ export default function Header() {
                         <Link
                             href={HOBBIES.href}
                             onClick={() => setOpen(false)}
+                            onMouseEnter={prefetchHobbies}
+                            onFocus={prefetchHobbies}
                             className={hobbiesClass("text-2xl")}
                         >
                             {HOBBIES.label}

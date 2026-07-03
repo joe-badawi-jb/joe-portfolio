@@ -38,7 +38,9 @@ export default function InView({
 
     return (
         <div ref={ref} className={className}>
-            {visible && children}
+            {visible && (
+                <div className="model-fade-in h-full w-full">{children}</div>
+            )}
         </div>
     );
 }
