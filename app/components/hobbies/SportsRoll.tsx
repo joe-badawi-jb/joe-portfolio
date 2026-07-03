@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, Environment, Lightformer } from "@react-three/drei";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Box3, Vector3, MathUtils, type Group } from "three";
+import InView from "@/app/components/ui/InView";
 
 // Each item rolls top -> bottom as the section scrolls, all on the same
 // horizontal line. `x` is its lane (fraction of viewport width), `spins` how
@@ -33,7 +34,7 @@ const ITEMS: Item[] = [
     { path: "/assets/3d-models/basketball_ball.glb", x: 0.32, spins: 6, sizeFactor: 0.175, base: [0, 0, 0] },
 ];
 
-ITEMS.forEach((i) => useGLTF.preload(i.path));
+// No eager preload — models load when this section scrolls into view.
 
 function RollingItem({
     item,
@@ -122,7 +123,7 @@ export default function SportsRoll() {
         // it overlaps the pinned training hero above it.
         <section ref={wrapRef} className="relative z-30 h-[300vh] md:h-[220vh]">
             <div className="sticky top-0 h-screen overflow-hidden rounded-t-[24px] bg-gradient-to-b from-zinc-900 via-zinc-950 to-indigo-950 shadow-2xl">
-                <div className="pointer-events-none absolute inset-0">
+                <InView className="pointer-events-none absolute inset-0">
                     <Canvas
                         dpr={[1, 2]}
                         camera={{ position: [0, 0, 10], fov: 45 }}
@@ -163,7 +164,7 @@ export default function SportsRoll() {
                             ))}
                         </Suspense>
                     </Canvas>
-                </div>
+                </InView>
             </div>
         </section>
     );

@@ -10,6 +10,7 @@ import {
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { Box3, Vector3, MathUtils, type Group } from "three";
+import InView from "@/app/components/ui/InView";
 
 const MODEL_PATH = "/assets/3d-models/naruto_running.glb";
 const TARGET_SIZE = 3; // largest dimension after normalisation (world units)
@@ -22,7 +23,7 @@ const FACING_Y = Math.PI / 2;
 // below centre). 0 = centre, 0.5 = bottom edge.
 const GROUND_FACTOR = 0.24;
 
-useGLTF.preload(MODEL_PATH);
+// No eager preload — the model loads when this section scrolls into view.
 
 function Naruto({ progress }: { progress: React.MutableRefObject<number> }) {
     const group = useRef<Group>(null);
@@ -124,18 +125,18 @@ export default function NarutoTransition() {
                     className="absolute inset-y-0 -left-[25%] w-[150%] will-change-transform"
                 >
                     <Image
-                        src="/assets/images/sandvillag-hd.png"
+                        src="/assets/images/sandvillage.webp"
                         alt="Hidden Sand Village"
                         fill
-                        priority
-                        quality={100}
+                        quality={90}
                         sizes="150vw"
                         className="object-cover"
                     />
                 </div>
 
-                {/* Naruto running across the ground */}
-                <div className="pointer-events-none absolute inset-0">
+                {/* Naruto running across the ground — canvas mounts (and the
+                    model loads) only when the section nears the viewport. */}
+                <InView className="pointer-events-none absolute inset-0">
                     <Canvas
                         dpr={[1, 2]}
                         camera={{ position: [0, 0, 9], fov: 45 }}
@@ -164,7 +165,7 @@ export default function NarutoTransition() {
                             <Naruto progress={progress} />
                         </Suspense>
                     </Canvas>
-                </div>
+                </InView>
             </div>
         </section>
     );

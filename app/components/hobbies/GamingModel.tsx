@@ -11,6 +11,7 @@ import {
 } from "@react-three/drei";
 import { Suspense, useEffect, useRef } from "react";
 import type { Group } from "three";
+import CanvasLoader from "@/app/components/ui/CanvasLoader";
 
 const MODEL_PATH = "/assets/3d-models/pacman.glb";
 
@@ -43,7 +44,7 @@ export default function GamingModel() {
             gl={{ alpha: true }}
             className="h-full w-full"
         >
-            <Suspense fallback={null}>
+            <Suspense fallback={<CanvasLoader />}>
                 <Environment resolution={256}>
                     <Lightformer
                         intensity={3}

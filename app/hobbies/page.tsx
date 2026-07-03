@@ -6,6 +6,7 @@ import GokuHintPopup from "@/app/components/hobbies/GokuHintPopup";
 import NarutoTransition from "@/app/components/hobbies/NarutoTransition";
 import SportsRoll from "@/app/components/hobbies/SportsRoll";
 import GamingModel from "@/app/components/hobbies/GamingModel";
+import InView from "@/app/components/ui/InView";
 
 export const metadata: Metadata = {
     title: "Hobbies",
@@ -24,7 +25,7 @@ export default function HobbiesPage() {
                 the viewport minus the sticky header (~112px). */}
             <section className="sticky top-0 z-0 h-[calc(100vh-112px)] w-full overflow-hidden bg-[url('/assets/images/akatsuki.jpg')] bg-cover bg-center text-white">
                 <Image
-                    src="/assets/images/anime-crossover.png"
+                    src="/assets/images/anime-crossover.webp"
                     alt="A crossover of favourite anime characters"
                     fill
                     priority
@@ -71,11 +72,10 @@ export default function HobbiesPage() {
                 same treatment as the anime hero. */}
             <section className="sticky top-0 z-20 h-[calc(100vh-112px)] w-full overflow-hidden bg-zinc-950 text-white">
                 <Image
-                    src="/assets/images/powerlifting-hd.png"
+                    src="/assets/images/powerlifting.webp"
                     alt="Loaded barbell — powerlifting"
                     fill
-                    priority
-                    quality={100}
+                    quality={90}
                     sizes="100vw"
                     className="object-cover"
                 />
@@ -111,8 +111,7 @@ export default function HobbiesPage() {
                     src="/assets/images/gaming.webp"
                     alt="Gaming setup"
                     fill
-                    priority
-                    quality={100}
+                    quality={90}
                     sizes="100vw"
                     className="object-cover"
                 />
@@ -142,10 +141,11 @@ export default function HobbiesPage() {
                     <div className="hidden lg:block" />
                 </div>
 
-                {/* Right: 3D gaming model — stuck to the bottom of the hero. */}
-                <div className="pointer-events-none absolute bottom-0 right-0 h-[55%] w-full lg:h-[85%] lg:w-1/2">
+                {/* Right: 3D gaming model — stuck to the bottom of the hero.
+                    Mounts only when scrolled near so its model loads on demand. */}
+                <InView className="pointer-events-none absolute bottom-0 right-0 h-[55%] w-full lg:h-[85%] lg:w-1/2">
                     <GamingModel />
-                </div>
+                </InView>
             </section>
 
             {/* Closing outro — wraps up the personal tour. */}
