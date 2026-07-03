@@ -37,6 +37,14 @@ export default function IntroVideo({ src }: { src: string }) {
         const v = videoRef.current;
         if (!v) return;
 
+        // Force the page to the top BEFORE locking scroll, so the hobbies page
+        // never opens at the previous page's scroll position (e.g. contact).
+        const html = document.documentElement;
+        const prevBehavior = html.style.scrollBehavior;
+        html.style.scrollBehavior = "auto";
+        window.scrollTo(0, 0);
+        html.style.scrollBehavior = prevBehavior;
+
         // Lock scrolling while the intro covers the screen.
         document.body.classList.add("overflow-hidden");
 
