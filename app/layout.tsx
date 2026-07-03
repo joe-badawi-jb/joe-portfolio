@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Providers from "./providers";
 import Header from "./components/header/Header";
@@ -109,6 +110,20 @@ export default function RootLayout({
           <ScrollToTop />
           <MobileNotice />
         </Providers>
+
+        {/* Google Analytics (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-PKQZDWCNMM"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-PKQZDWCNMM');
+          `}
+        </Script>
       </body>
     </html>
   );
