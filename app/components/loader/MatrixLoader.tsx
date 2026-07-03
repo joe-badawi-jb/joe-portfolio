@@ -6,7 +6,7 @@ import ModelWaiter from "@/app/components/ui/ModelWaiter";
 
 // Minimum time the loader is shown (also when the hero intro starts), a hard
 // cap so it never hangs, and how long the exit wipe takes.
-export const LOADER_DURATION_MS = 3000;
+export const LOADER_DURATION_MS = 2000;
 const MAX_MS = 12000;
 const EXIT_MS = 600;
 
@@ -45,6 +45,10 @@ export default function MatrixLoader() {
     const [minPassed, setMinPassed] = useState(false);
     // Ready immediately if this page has no critical model to wait for.
     const [assetReady, setAssetReady] = useState(model === null);
+    // On the hobbies page, also wait for the intro video to be buffered so it
+    // plays immediately when the loader lifts (no second "loading" screen).
+    const needsVideo = (pathname ?? "").startsWith("/hobbies");
+    const [videoReady, setVideoReady] = useState(!needsVideo);
     const exitStarted = useRef(false);
 
     const startExit = useCallback(() => {
@@ -65,10 +69,19 @@ export default function MatrixLoader() {
         return () => window.clearInterval(id);
     }, []);
 
-    // Lift once the minimum time has passed AND the first model is loaded.
+    // Lift once the minimum time has passed, the first model is loaded, and
+    // (on hobbies) the intro video is buffered.
     useEffect(() => {
-        if (minPassed && assetReady) startExit();
-    }, [minPassed, assetReady, startExit]);
+        if (minPassed && assetReady && videoReady) startExit();
+    }, [minPassed, assetReady, videoReady, startExit]);
+
+    // Wait for the hobbies intro video to be ready to play.
+    useEffect(() => {
+        if (!needsVideo) return;
+        const onVideoReady = () => setVideoReady(true);
+        window.addEventListener("video:ready", onVideoReady);
+        return () => window.removeEventListener("video:ready", onVideoReady);
+    }, [needsVideo]);
 
     useEffect(() => {
         // Skip the animation entirely for reduced-motion users. This is a

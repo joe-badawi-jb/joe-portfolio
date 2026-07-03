@@ -116,6 +116,10 @@ export default function IntroVideo({ src }: { src: string }) {
                 playsInline
                 preload="auto"
                 onPlaying={() => setReady(true)}
+                onCanPlayThrough={() =>
+                    window.dispatchEvent(new Event("video:ready"))
+                }
+                onError={() => window.dispatchEvent(new Event("video:ready"))}
                 onEnded={requestFinish}
                 className="h-full w-full object-cover"
             />
