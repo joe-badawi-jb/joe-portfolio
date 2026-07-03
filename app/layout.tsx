@@ -4,7 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 import Header from "./components/header/Header";
 import Footer from "./components/sections/Footer";
-import MatrixLoader from "./components/loader/MatrixLoader";
+import RouteLoader from "./components/loader/RouteLoader";
 import ScrollToTop from "./components/ui/ScrollToTop";
 import ScrollTopOnNavigate from "./components/ui/ScrollTopOnNavigate";
 import MobileNotice from "./components/ui/MobileNotice";
@@ -102,7 +102,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           <ScrollTopOnNavigate />
-          <MatrixLoader />
+          <RouteLoader />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

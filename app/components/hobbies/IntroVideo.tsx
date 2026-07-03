@@ -73,9 +73,24 @@ export default function IntroVideo({ src }: { src: string }) {
                 }
             }
         };
-        play();
 
-        return () => document.body.classList.remove("overflow-hidden");
+        // Start the video only once the matrix loader has lifted, so it doesn't
+        // play (with sound) hidden behind the loader. Fallback in case the
+        // loader event never fires.
+        let started = false;
+        const startPlay = () => {
+            if (started) return;
+            started = true;
+            play();
+        };
+        window.addEventListener("loader:done", startPlay);
+        const fallback = window.setTimeout(startPlay, 6000);
+
+        return () => {
+            window.removeEventListener("loader:done", startPlay);
+            window.clearTimeout(fallback);
+            document.body.classList.remove("overflow-hidden");
+        };
     }, []);
 
     const enableSound = () => {

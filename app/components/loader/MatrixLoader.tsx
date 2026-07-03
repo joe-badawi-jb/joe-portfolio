@@ -77,6 +77,9 @@ export default function MatrixLoader() {
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setHidden(true);
+            // Still signal so anything waiting on the loader (hero intro, the
+            // hobbies video) proceeds.
+            window.dispatchEvent(new Event("loader:done"));
             return;
         }
 
@@ -158,7 +161,7 @@ export default function MatrixLoader() {
     return (
         <div
             aria-hidden
-            className={`matrix-loader fixed inset-0 z-[100] bg-surface ${
+            className={`matrix-loader fixed inset-0 z-[110] bg-surface ${
                 exiting ? "matrix-exit" : ""
             }`}
         >
