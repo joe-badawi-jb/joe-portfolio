@@ -103,6 +103,9 @@ export default function ProjectsCarousel() {
         if (!el) return;
         const nextTitle = PROJECTS[active]?.title ?? "";
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            // Reduced-motion: swap the title instantly, no animation. This
+            // intentional one-shot setState is fine here.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setDisplayTitle(nextTitle);
             return;
         }

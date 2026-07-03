@@ -1,15 +1,21 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ContactButton from "../buttons/ContactButton";
 
+// In-page section links (scroll to an anchor on the home page).
 const NAV_LINKS = [
     { label: "About", href: "#about" },
     { label: "Skills", href: "#skills" },
     { label: "Projects", href: "#projects" },
     { label: "Stack", href: "#stack" },
 ];
+
+// Route link — its own page rather than a section on the home page.
+const HOBBIES = { label: "Hobbies", href: "/hobbies" };
 
 // Animated left->right strikethrough + colour shift on hover (see
 // `.nav-link` in globals.css), shared by desktop and mobile links.
@@ -19,22 +25,32 @@ const navLinkClasses = "nav-link text-xl font-medium text-content";
 const accentByIndex = (i: number) =>
     i % 2 === 0 ? "nav-accent-blue" : "nav-accent-pink";
 
+// The Hobbies accent continues the alternation after the section links.
+const HOBBIES_ACCENT = accentByIndex(NAV_LINKS.length);
+
 export default function Header() {
+    const pathname = usePathname();
+    const isHome = pathname === "/";
     const [open, setOpen] = useState(false);
     const [activeHref, setActiveHref] = useState<string | null>(null);
 
     // Scroll-spy: mark the section currently around the middle of the viewport
-    // as active.
+    // as active. The contact section is observed too (though it has no nav
+    // link) so scrolling into it clears the highlight instead of leaving the
+    // previous section — e.g. "Stack" — stuck active.
     useEffect(() => {
-        const sections = NAV_LINKS.map((l) =>
-            document.getElementById(l.href.slice(1))
-        ).filter((el): el is HTMLElement => el !== null);
+        const ids = [...NAV_LINKS.map((l) => l.href.slice(1)), "contact"];
+        const sections = ids
+            .map((id) => document.getElementById(id))
+            .filter((el): el is HTMLElement => el !== null);
         if (sections.length === 0) return;
 
         const io = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    if (entry.isIntersecting) setActiveHref("#" + entry.target.id);
+                    if (!entry.isIntersecting) return;
+                    const id = entry.target.id;
+                    setActiveHref(id === "contact" ? null : "#" + id);
                 });
             },
             { rootMargin: "-45% 0px -50% 0px" }
@@ -47,30 +63,42 @@ export default function Header() {
         e: React.MouseEvent<HTMLAnchorElement>,
         href: string
     ) => {
+        setOpen(false);
+        // On the home page, intercept and smooth-scroll to the section. From
+        // any other page (e.g. /hobbies) let the link navigate to /#section
+        // so the browser lands on the home page at that anchor.
+        if (!isHome) return;
         e.preventDefault();
         setActiveHref(href);
-        setOpen(false);
         document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
     };
 
     const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault();
         setActiveHref(null);
         setOpen(false);
+        // On the home page just scroll to the top; elsewhere let the link
+        // navigate back home.
+        if (!isHome) return;
+        e.preventDefault();
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const linkClass = (href: string, i: number, extra = "") =>
         `${navLinkClasses} ${extra} ${accentByIndex(i)} ${
-            activeHref === href ? "is-active" : ""
+            isHome && activeHref === href ? "is-active" : ""
+        }`;
+
+    const hobbiesClass = (extra = "") =>
+        `${navLinkClasses} ${extra} ${HOBBIES_ACCENT} ${
+            pathname === HOBBIES.href ? "is-active" : ""
         }`;
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-hairline bg-surface/80 backdrop-blur transition-colors">
             <nav className="container flex items-center justify-between py-4">
                 {/* Logo — back to the hero / top */}
-                <a
-                    href="#"
+                <Link
+                    href="/"
                     onClick={handleLogoClick}
                     className="shrink-0"
                     aria-label="Back to top"
@@ -83,21 +111,30 @@ export default function Header() {
                         priority
                         className="object-cover rounded-[50%]"
                     />
-                </a>
+                </Link>
 
                 {/* Desktop nav (centered) */}
                 <ul className="hidden items-center gap-6 md:flex">
                     {NAV_LINKS.map((link, i) => (
                         <li key={link.href}>
-                            <a
-                                href={link.href}
+                            <Link
+                                href={isHome ? link.href : `/${link.href}`}
                                 onClick={(e) => handleNavClick(e, link.href)}
                                 className={linkClass(link.href, i)}
                             >
                                 {link.label}
-                            </a>
+                            </Link>
                         </li>
                     ))}
+                    <li>
+                        <Link
+                            href={HOBBIES.href}
+                            onClick={() => setOpen(false)}
+                            className={hobbiesClass()}
+                        >
+                            {HOBBIES.label}
+                        </Link>
+                    </li>
                 </ul>
 
                 {/* Desktop CTA */}
@@ -143,15 +180,24 @@ export default function Header() {
                 <ul className="flex flex-col gap-6">
                     {NAV_LINKS.map((link, i) => (
                         <li key={link.href}>
-                            <a
-                                href={link.href}
+                            <Link
+                                href={isHome ? link.href : `/${link.href}`}
                                 onClick={(e) => handleNavClick(e, link.href)}
                                 className={linkClass(link.href, i, "text-2xl")}
                             >
                                 {link.label}
-                            </a>
+                            </Link>
                         </li>
                     ))}
+                    <li>
+                        <Link
+                            href={HOBBIES.href}
+                            onClick={() => setOpen(false)}
+                            className={hobbiesClass("text-2xl")}
+                        >
+                            {HOBBIES.label}
+                        </Link>
+                    </li>
                 </ul>
                 <div className="mt-6">
                     <ContactButton className="w-full" />

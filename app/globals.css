@@ -69,6 +69,7 @@
 html {
   /* offset anchor / scroll-into-view targets for the sticky header */
   scroll-padding-top: 6rem;
+  scroll-behavior: smooth;
 }
 
 body {

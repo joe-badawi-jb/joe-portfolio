@@ -1,3 +1,6 @@
+/* Scratch/experiment page for anime.js — not part of the portfolio. Lint is
+   relaxed here since it's throwaway demo code using anime.js's dynamic scope. */
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 'use client'
 
 import { animate, createScope, spring, createDraggable, waapi } from 'animejs';

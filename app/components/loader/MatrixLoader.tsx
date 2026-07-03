@@ -18,8 +18,11 @@ export default function MatrixLoader() {
     const [hidden, setHidden] = useState(false);
 
     useEffect(() => {
-        // Skip the animation entirely for reduced-motion users.
+        // Skip the animation entirely for reduced-motion users. This is a
+        // one-shot, mount-time shortcut (matchMedia is client-only), so the
+        // synchronous setState here is intentional.
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setHidden(true);
             return;
         }

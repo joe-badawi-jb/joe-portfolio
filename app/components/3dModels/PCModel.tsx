@@ -14,12 +14,6 @@ import { Suspense, useEffect } from 'react'
 
 const MODEL_PATH = '/assets/3d-models/modern_desk_setup__game_ready_3d_model.glb'
 
-// Rotation (radians) applied so the model's front faces the camera by default.
-// The model is authored facing along a different axis; a quarter turn about Y
-// brings the front around. Flip the sign if it ends up facing away, or use
-// Math.PI for a 180° turn.
-const FACING_ROTATION_Y = -Math.PI / 2
-
 function Model() {
     // useGLTF parses the .glb (geometry + embedded textures) and caches it.
     const { scene } = useGLTF(MODEL_PATH)
