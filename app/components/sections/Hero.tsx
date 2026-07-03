@@ -23,22 +23,33 @@ export default function Hero() {
   const modelWrap = useRef<HTMLDivElement>(null);
   const [showModel, setShowModel] = useState(false);
 
-  // Text intro: starts once the loader has wiped away.
+  // Text intro: starts once the loader has wiped away. The loader dispatches
+  // "loader:done" when it lifts (it may wait on the first model to load), so we
+  // start on that event — with a fallback timer in case it never fires.
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const introTimer = setTimeout(
-      () => {
-        scope.current = createHeroIntro(root, {
-          reducedMotion: reduce,
-          onComplete: () => setShowModel(true),
-        });
-      },
-      reduce ? 0 : LOADER_DURATION_MS
-    );
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      scope.current = createHeroIntro(root, {
+        reducedMotion: reduce,
+        onComplete: () => setShowModel(true),
+      });
+    };
+
+    if (reduce) {
+      start();
+      return () => scope.current?.revert();
+    }
+
+    window.addEventListener("loader:done", start);
+    const fallback = setTimeout(start, LOADER_DURATION_MS + 10000);
 
     return () => {
-      clearTimeout(introTimer);
+      window.removeEventListener("loader:done", start);
+      clearTimeout(fallback);
       scope.current?.revert();
     };
   }, []);
