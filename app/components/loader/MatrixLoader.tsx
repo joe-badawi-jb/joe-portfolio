@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ModelWaiter from "@/app/components/ui/ModelWaiter";
 
 // Minimum time the loader is shown (also when the hero intro starts), a hard
 // cap so it never hangs, and how long the exit wipe takes.
@@ -37,10 +38,23 @@ function criticalModel(pathname: string | null): string | null {
 export default function MatrixLoader() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const pathname = usePathname();
+    const model = criticalModel(pathname);
     const [exiting, setExiting] = useState(false);
     const [hidden, setHidden] = useState(false);
     const [msg, setMsg] = useState(0);
+    const [minPassed, setMinPassed] = useState(false);
+    // Ready immediately if this page has no critical model to wait for.
+    const [assetReady, setAssetReady] = useState(model === null);
     const exitStarted = useRef(false);
+
+    const startExit = useCallback(() => {
+        if (exitStarted.current) return;
+        exitStarted.current = true;
+        setExiting(true);
+        window.setTimeout(() => setHidden(true), EXIT_MS);
+        // Let the hero know it can start its intro / reveal the model now.
+        window.dispatchEvent(new Event("loader:done"));
+    }, []);
 
     // Rotate the status messages.
     useEffect(() => {
@@ -50,6 +64,11 @@ export default function MatrixLoader() {
         );
         return () => window.clearInterval(id);
     }, []);
+
+    // Lift once the minimum time has passed AND the first model is loaded.
+    useEffect(() => {
+        if (minPassed && assetReady) startExit();
+    }, [minPassed, assetReady, startExit]);
 
     useEffect(() => {
         // Skip the animation entirely for reduced-motion users. This is a
@@ -117,40 +136,13 @@ export default function MatrixLoader() {
         };
         raf = requestAnimationFrame(render);
 
-        // --- Dismissal: wait for min time AND the first model, capped by MAX.
-        let minPassed = false;
-        let assetReady = false;
-
-        const startExit = () => {
-            if (exitStarted.current) return;
-            exitStarted.current = true;
-            setExiting(true);
-            window.setTimeout(() => setHidden(true), EXIT_MS);
-            // Let the hero know it can start its intro now.
-            window.dispatchEvent(new Event("loader:done"));
-        };
-        const maybeExit = () => {
-            if (minPassed && assetReady) startExit();
-        };
-
-        const minTimer = window.setTimeout(() => {
-            minPassed = true;
-            maybeExit();
-        }, LOADER_DURATION_MS);
+        // Dismissal is driven by state: a minimum time, the model-loaded gate
+        // (ModelWaiter, in the JSX), and a hard MAX cap so it can never hang.
+        const minTimer = window.setTimeout(
+            () => setMinPassed(true),
+            LOADER_DURATION_MS
+        );
         const maxTimer = window.setTimeout(startExit, MAX_MS);
-
-        const model = criticalModel(pathname);
-        if (model) {
-            fetch(model, { cache: "force-cache" })
-                .then((r) => r.arrayBuffer())
-                .catch(() => {})
-                .finally(() => {
-                    assetReady = true;
-                    maybeExit();
-                });
-        } else {
-            assetReady = true;
-        }
 
         return () => {
             cancelAnimationFrame(raf);
@@ -171,6 +163,11 @@ export default function MatrixLoader() {
             }`}
         >
             <canvas ref={canvasRef} className="block h-full w-full" />
+
+            {/* Hold the loader until the first model has actually loaded. */}
+            {model && (
+                <ModelWaiter path={model} onReady={() => setAssetReady(true)} />
+            )}
 
             {/* Friendly status overlay. */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center">

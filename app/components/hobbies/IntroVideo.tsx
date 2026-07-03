@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ModelWaiter from "@/app/components/ui/ModelWaiter";
 
 type Phase = "playing" | "fading" | "done";
+
+// The first model behind the intro — we don't reveal the page until it's loaded.
+const FIRST_MODEL = "/assets/3d-models/goku_nimbus.glb";
 
 /**
  * Fullscreen intro that plays a video (ideally with sound) on page load, then
@@ -18,8 +22,13 @@ export default function IntroVideo({ src }: { src: string }) {
     const [phase, setPhase] = useState<Phase>("playing");
     const [muted, setMuted] = useState(false);
     const [ready, setReady] = useState(false);
+    const [modelReady, setModelReady] = useState(false);
+    const [wantFinish, setWantFinish] = useState(false);
+    const exitStarted = useRef(false);
 
-    const finish = () => {
+    const doExit = () => {
+        if (exitStarted.current) return;
+        exitStarted.current = true;
         setPhase("fading");
         window.setTimeout(() => {
             // Restore scrolling once the intro is gone. (The effect cleanup
@@ -31,6 +40,14 @@ export default function IntroVideo({ src }: { src: string }) {
             window.dispatchEvent(new Event("intro:done"));
         }, 700);
     };
+
+    // Request to end the intro (video ended / skipped / failed). Only actually
+    // reveals the page once the first model is loaded, so nothing pops in.
+    const requestFinish = () => setWantFinish(true);
+
+    useEffect(() => {
+        if (wantFinish && modelReady) doExit();
+    }, [wantFinish, modelReady]);
 
     useEffect(() => {
         const v = videoRef.current;
@@ -52,7 +69,7 @@ export default function IntroVideo({ src }: { src: string }) {
                     await v.play();
                 } catch {
                     // Even muted playback failed; just skip the intro.
-                    finish();
+                    requestFinish();
                 }
             }
         };
@@ -84,13 +101,27 @@ export default function IntroVideo({ src }: { src: string }) {
                 playsInline
                 preload="auto"
                 onPlaying={() => setReady(true)}
-                onEnded={finish}
+                onEnded={requestFinish}
                 className="h-full w-full object-cover"
+            />
+
+            {/* Hold the reveal until the first model has loaded. */}
+            <ModelWaiter
+                path={FIRST_MODEL}
+                onReady={() => setModelReady(true)}
             />
 
             {/* Buffering spinner while the video loads/starts. */}
             {!ready && phase === "playing" && (
                 <span className="absolute h-10 w-10 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+            )}
+
+            {/* If the video ended but the scene isn't ready yet, keep a loader. */}
+            {wantFinish && !modelReady && phase === "playing" && (
+                <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-sm text-white/90 backdrop-blur">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Preparing the scene…
+                </div>
             )}
 
             {/* Offer sound if autoplay forced us to start muted. */}
@@ -107,7 +138,7 @@ export default function IntroVideo({ src }: { src: string }) {
             {/* Always allow skipping. */}
             <button
                 type="button"
-                onClick={finish}
+                onClick={requestFinish}
                 className="absolute right-6 top-6 rounded-full border border-white/40 px-5 py-2 text-xs font-semibold uppercase tracking-widest text-white/90 transition-colors hover:bg-white/10"
             >
                 Skip

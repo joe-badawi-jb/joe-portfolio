@@ -33,6 +33,9 @@ export default function Hero() {
     const start = () => {
       if (started) return;
       started = true;
+      // Reveal the model right away — the loader already waited for it to load,
+      // so it renders instantly and animates in alongside the text intro.
+      setShowModel(true);
       scope.current = createHeroIntro(root, {
         reducedMotion: reduce,
         onComplete: () => setShowModel(true),
